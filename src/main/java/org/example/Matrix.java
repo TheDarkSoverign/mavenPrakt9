@@ -4,12 +4,10 @@ public final class Matrix extends ArrayPI {
 
 
     Matrix(int[] array1, int[] array2) {
-        array1 = new int[6];
-        array2 = new int[6];
+        //конструктор int
     }
 
     Matrix(String[] array1, String[] array2) {
-        array1 = new String[6];
-        array2 = new String[6];
+        //конструктор String
     }
 }
