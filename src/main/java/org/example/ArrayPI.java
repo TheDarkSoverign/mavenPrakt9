@@ -42,8 +42,16 @@ public class ArrayPI extends Main {
 
     public void task3() {
         int[][] array1 = createArray();
-        System.out.println(Arrays.deepToString(array1));
-        //Ввод матриц
+        System.out.println("Массив 1: ");
+        for (int[] i : array1) {
+            System.out.println(Arrays.toString(i));
+        }
+
+        int[][] array2 = createArray();
+        System.out.println("Массив 2:");
+        for (int[] i : array2) {
+            System.out.println(Arrays.toString(i));
+        }
     }
 
 
