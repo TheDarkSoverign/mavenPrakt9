@@ -7,6 +7,7 @@ import java.sql.Statement;
 
 public class ArrayPI extends Main {
 
+
     public void task1() {
         String query = "SELECT table_name AS Названия_таблиц FROM postgres.information_schema.tables WHERE table_schema = 'public'";
         try {
@@ -55,5 +56,10 @@ public class ArrayPI extends Main {
                 SQLException e) {
             System.out.println("Не удалось выполнить запрос, " + e.getMessage());
         }
+    }
+
+    public int[][] createArray() {
+        int[][] array = new int[6][6];
+        return array;
     }
 }

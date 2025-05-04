@@ -1,22 +1,16 @@
 package org.example;
 
 import java.sql.*;
-import java.util.NoSuchElementException;
 import java.util.Scanner;
-import java.io.FileOutputStream;
-import java.io.IOException;
-
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
-import static java.lang.Math.abs;
-import static java.lang.Math.pow;
-
 
 public class Main {
     protected static Scanner sc = new Scanner(System.in);
     protected static Connection con;
-    protected static String table = "task1";
+    static final String schema = "task6";
+    protected static String table = "task6";
+    static final String createBaseTable = "CREATE TABLE IF NOT EXISTS " + table + " (ID SERIAL)";
+    static final String selectFromTable = "SELECT * FROM " + table;
+
 
     static String Url = "jdbc:postgresql://localhost:5432/postgres";
 
@@ -27,11 +21,28 @@ public class Main {
             System.out.println("Не удалось подключиться к базе данных: " + e.getMessage());
         }
 
-        String query = "CREATE TABLE IF NOT EXISTS task1 (id SERIAL, sum INT, sub INT, mul INT, div INT, mod INT, abs_1 INT, abs_2 INT, pow INT)";
+        try {
+            con.setAutoCommit(false);
+
+            Statement st = con.createStatement();
+            st.executeUpdate("CREATE SCHEMA IF NOT EXISTS " + schema);
+            st.executeUpdate("SET search_path TO " + schema);
+
+            con.commit();
+            System.out.println("Используется схема - " + schema);
+        } catch (SQLException e) {
+            System.out.println("Не удалось создать схему для задания: " + e.getMessage());
+            try {
+                con.rollback();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+
         try {
             Statement st = con.createStatement();
-            st.executeUpdate(query);
-            table = "task1";
+
+            st.executeUpdate(createBaseTable);
             System.out.println("Используется таблица по умолчанию - " + table);
         } catch (SQLException e) {
             System.out.println("Не удалось использовать таблицу по умолчанию, " + e.getMessage());
@@ -87,7 +98,6 @@ public class Main {
 }
 
 class Task extends Main {
-
 
 
 }
