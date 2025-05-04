@@ -1,9 +1,7 @@
 package org.example;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.util.Arrays;
 
 public class ArrayPI extends Main {
 
@@ -42,6 +40,8 @@ public class ArrayPI extends Main {
     }
 
     public void task3() {
+        int[][] array1 = createArray();
+        System.out.println(Arrays.deepToString(array1));
         //Ввод матриц
     }
 
@@ -59,7 +59,14 @@ public class ArrayPI extends Main {
     }
 
     public int[][] createArray() {
-        int[][] array = new int[6][6];
+        int[][] array = new int[7][7];
+        for (int i = 0; i < array.length; i++) {
+            System.out.print("Введите строку " + i+1 + ": ");
+            for (int j = 0; j < array[i].length; j++) {
+                array[i][j] = sc.nextInt();
+            }
+        }
+        sc.nextLine();
         return array;
     }
 }
