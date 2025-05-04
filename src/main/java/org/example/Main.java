@@ -8,7 +8,8 @@ public class Main {
     protected static Connection con;
     static final String schema = "task6";
     protected static String table = "task6";
-    static final String createBaseTable = "CREATE TABLE IF NOT EXISTS " + table + " (ID SERIAL)";
+    static final String createTable = "CREATE TABLE IF NOT EXISTS " + table + " (ID SERIAL, matrix1 int[], matrix2 int[], matrixMult int[])";
+    static final String insertIntoTable = "INSERT INTO " + table + " (matrix1, matrix2, matrixMult) VALUES (?, ?, ?)";
     static final String selectFromTable = "SELECT * FROM " + table;
 
 
@@ -29,6 +30,7 @@ public class Main {
             st.executeUpdate("SET search_path TO " + schema);
 
             con.commit();
+            con.setAutoCommit(true);
             System.out.println("Используется схема - " + schema);
         } catch (SQLException e) {
             System.out.println("Не удалось создать схему для задания: " + e.getMessage());
@@ -42,7 +44,7 @@ public class Main {
         try {
             Statement st = con.createStatement();
 
-            st.executeUpdate(createBaseTable);
+            st.executeUpdate(createTable);
             System.out.println("Используется таблица по умолчанию - " + table);
         } catch (SQLException e) {
             System.out.println("Не удалось использовать таблицу по умолчанию, " + e.getMessage());
@@ -73,7 +75,7 @@ public class Main {
                 case 1 -> tasks.task1();
                 case 2 -> tasks.task2();
                 case 3 -> tasks.task3();
-                case 4 -> tasks.insertData();
+                //case 4 -> tasks.insertData();
                 case 5 -> {
                     System.out.print("Введите название файла: ");
                     String filepath = sc.nextLine();

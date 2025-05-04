@@ -17,8 +17,7 @@ public class ExportToExcel extends Main {
     public void exportData(String table, String filepath) {
         this.filepath = filepath;
 
-        String printAll = "SELECT * FROM " + table;
-        try (PreparedStatement pst = con.prepareStatement(printAll); ResultSet rs = pst.executeQuery()) {
+        try (PreparedStatement pst = con.prepareStatement(selectFromTable); ResultSet rs = pst.executeQuery()) {
             Workbook wb = new XSSFWorkbook();
             Sheet sheet = wb.createSheet("task 1");
             Row row = sheet.createRow(0);

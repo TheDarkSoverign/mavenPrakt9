@@ -2,7 +2,6 @@ package org.example;
 
 import java.sql.*;
 import java.util.Arrays;
-import java.util.InputMismatchException;
 
 public class ArrayPI extends Main {
 
@@ -41,24 +40,30 @@ public class ArrayPI extends Main {
     }
 
     public void task3() {
-        int[][] array1 = createArray();
-        System.out.println("Массив 1: ");
-        for (int[] i : array1) {
+        System.out.println("Введите матрицу 1");
+        int[][] matrix1 = createMatrix();
+        System.out.println("Матрица 1: ");
+        for (int[] i : matrix1) {
             System.out.println(Arrays.toString(i));
         }
 
-        int[][] array2 = createArray();
-        System.out.println("Массив 2:");
-        for (int[] i : array2) {
+        System.out.println("Введите матрицу 2");
+        int[][] matrix2 = createMatrix();
+        System.out.println("Матрица 2:");
+        for (int[] i : matrix2) {
             System.out.println(Arrays.toString(i));
         }
+
+        insertData(matrix1, matrix2);
+        selectData();
     }
 
-
-    public void insertData() {
-        String query = "INSERT INTO " + table + " (ID) VALUES (?)";
-        try (PreparedStatement pst = con.prepareStatement(query)) {
-            pst.setObject(1, 1);
+    public void insertData(int[][] matrix1, int[][] matrix2) {
+        System.out.println("Сохраняю в таблицу...");
+        try (PreparedStatement pst = con.prepareStatement(insertIntoTable)) {
+            pst.setArray(1, con.createArrayOf("INTEGER", matrix1));
+            pst.setArray(2, con.createArrayOf("INTEGER", matrix2));
+            pst.setNull( 3, Types.NULL);
             pst.executeUpdate();
             System.out.println("Все выполненные результаты добавлены в таблицу!");
         } catch (
@@ -67,15 +72,51 @@ public class ArrayPI extends Main {
         }
     }
 
-    public int[][] createArray() {
-        int[][] array = new int[7][7];
-        for (int i = 0; i < array.length; i++) {
+    public void selectData() {
+        System.out.println("Получаю данные...");
+        try (PreparedStatement pst = con.prepareStatement(selectFromTable); ResultSet rs = pst.executeQuery()) {
+            System.out.println("Полученные данные: ");
+            System.out.printf("%2s | %-31s | %-31s | %-31s \n", "ID", "Матрица 1", "Матрица 2", "Перемноженная матрица");
+            while (rs.next()) {
+                int ID = rs.getInt(1);
+
+                Array matrixArray1 = rs.getArray(2);
+                Integer[][] matrix1 = (Integer[][])matrixArray1.getArray();
+
+                Array matrixArray2 = rs.getArray(3);
+                Integer[][] matrix2 = (Integer[][])matrixArray2.getArray();
+
+                Array matrixArray3 = rs.getArray(4);
+                if (matrixArray3 != null) {
+                    Integer[][] matrixMult = (Integer[][])matrixArray3.getArray();
+                    System.out.printf("%2d. | %-31s | %-31s | %-31s \n", ID, Arrays.toString(matrix1[0]), Arrays.toString(matrix2[0]), Arrays.toString(matrixMult[0]));
+                    for (int i = 1; i < 7; i++) {
+                        System.out.printf("%3s | %-31s | %-31s | %-31s \n", "", Arrays.toString(matrix1[i]), Arrays.toString(matrix2[i]), Arrays.toString(matrixMult[i]));
+                    }
+                } else {
+                    System.out.printf("%2d. | %-31s | %-31s | %-31s \n", ID, Arrays.toString(matrix1[0]), Arrays.toString(matrix2[0]), "NULL");
+                    for (int i = 1; i < 7; i++) {
+                        System.out.printf("%3s | %-31s | %-31s | %-31s \n", "", Arrays.toString(matrix1[i]), Arrays.toString(matrix2[i]), "NULL");
+                    }
+                }
+
+
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Не удалось получить данные из таблицы, " + e.getMessage());
+        }
+    }
+
+    public int[][] createMatrix() {
+        int[][] matrix = new int[7][7];
+        for (int i = 0; i < matrix.length; i++) {
             System.out.print("Введите строку чисел ");
             System.out.print(i+1);
             System.out.print(": ");
-            for (int j = 0; j < array[i].length; j++) {
+            for (int j = 0; j < matrix[i].length; j++) {
                 try {
-                    array[i][j] = Integer.parseInt(sc.next());
+                    matrix[i][j] = Integer.parseInt(sc.next());
                 } catch (NumberFormatException e) {
                     System.out.print("Неправильный тип данных в строке ");
                     System.out.println(i-- + 1);
@@ -84,6 +125,6 @@ public class ArrayPI extends Main {
             }
         }
         sc.nextLine();
-        return array;
+        return matrix;
     }
 }
