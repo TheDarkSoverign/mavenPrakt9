@@ -2,6 +2,7 @@ package org.example;
 
 import java.sql.*;
 import java.util.Arrays;
+import java.util.InputMismatchException;
 
 public class ArrayPI extends Main {
 
@@ -61,9 +62,17 @@ public class ArrayPI extends Main {
     public int[][] createArray() {
         int[][] array = new int[7][7];
         for (int i = 0; i < array.length; i++) {
-            System.out.print("Введите строку " + i+1 + ": ");
+            System.out.print("Введите строку чисел ");
+            System.out.print(i+1);
+            System.out.print(": ");
             for (int j = 0; j < array[i].length; j++) {
-                array[i][j] = sc.nextInt();
+                try {
+                    array[i][j] = Integer.parseInt(sc.next());
+                } catch (NumberFormatException e) {
+                    System.out.print("Неправильный тип данных в строке ");
+                    System.out.println(i-- + 1);
+                    break;
+                }
             }
         }
         sc.nextLine();
