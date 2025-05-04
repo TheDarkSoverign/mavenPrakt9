@@ -8,9 +8,9 @@ public class Main {
     protected static Connection con;
     static final String schema = "task6";
     protected static String table = "task6";
-    static final String createTable = "CREATE TABLE IF NOT EXISTS " + table + " (ID SERIAL, matrix1 int[], matrix2 int[], matrixMult int[])";
-    static final String insertIntoTable = "INSERT INTO " + table + " (matrix1, matrix2, matrixMult) VALUES (?, ?, ?)";
-    static final String selectFromTable = "SELECT * FROM " + table;
+    static final String createTable = "CREATE TABLE IF NOT EXISTS ? (ID SERIAL, matrix1 int[], matrix2 int[], matrixMult int[])";
+    static final String insertIntoTable = "INSERT INTO ? (matrix1, matrix2, matrixMult) VALUES (?, ?, ?)";
+    static final String selectFromTable = "SELECT * FROM ?";
 
 
     static String Url = "jdbc:postgresql://localhost:5432/postgres";
@@ -42,9 +42,9 @@ public class Main {
         }
 
         try {
-            Statement st = con.createStatement();
-
-            st.executeUpdate(createTable);
+            PreparedStatement pst = con.prepareStatement(createTable);
+            pst.setString(1, table);
+            pst.executeUpdate();
             System.out.println("Используется таблица по умолчанию - " + table);
         } catch (SQLException e) {
             System.out.println("Не удалось использовать таблицу по умолчанию, " + e.getMessage());
@@ -75,7 +75,6 @@ public class Main {
                 case 1 -> tasks.task1();
                 case 2 -> tasks.task2();
                 case 3 -> tasks.task3();
-                //case 4 -> tasks.insertData();
                 case 5 -> {
                     System.out.print("Введите название файла: ");
                     String filepath = sc.nextLine();
@@ -97,9 +96,4 @@ public class Main {
         System.out.println("Подключились к БД. ");
         menu();
     }
-}
-
-class Task extends Main {
-
-
 }

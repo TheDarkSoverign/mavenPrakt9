@@ -7,7 +7,7 @@ public class ArrayPI extends Main {
 
 
     public void task1() {
-        String query = "SELECT table_name AS Названия_таблиц FROM postgres.information_schema.tables WHERE table_schema = 'public'";
+        String query = "SELECT table_name AS Названия_таблиц FROM postgres.information_schema.tables WHERE table_schema = '" + schema + "'";
         try {
             Statement st = con.createStatement();
             ResultSet rs = st.executeQuery(query);
@@ -28,10 +28,10 @@ public class ArrayPI extends Main {
     public void task2() {
         System.out.print("Введите название таблицы: ");
         table = sc.next();
-        String query = "CREATE TABLE IF NOT EXISTS " + table + " (id SERIAL)";
         try {
-            Statement st = con.createStatement();
-            st.executeUpdate(query);
+            PreparedStatement pst = con.prepareStatement(createTable);
+            pst.setString(1, table);
+            pst.executeUpdate();
             System.out.println("Таблица " + table + " успешно создана/выбрана!");
         } catch (SQLException e) {
             System.out.println("Не удалось выполнить запрос, " + e.getMessage());
@@ -61,9 +61,10 @@ public class ArrayPI extends Main {
     public void insertData(int[][] matrix1, int[][] matrix2) {
         System.out.println("Сохраняю в таблицу...");
         try (PreparedStatement pst = con.prepareStatement(insertIntoTable)) {
-            pst.setArray(1, con.createArrayOf("INTEGER", matrix1));
-            pst.setArray(2, con.createArrayOf("INTEGER", matrix2));
-            pst.setNull( 3, Types.NULL);
+            pst.setString(1, table);
+            pst.setArray(2, con.createArrayOf("INTEGER", matrix1));
+            pst.setArray(3, con.createArrayOf("INTEGER", matrix2));
+            pst.setNull(4, Types.NULL);
             pst.executeUpdate();
             System.out.println("Все выполненные результаты добавлены в таблицу!");
         } catch (
@@ -74,35 +75,35 @@ public class ArrayPI extends Main {
 
     public void selectData() {
         System.out.println("Получаю данные...");
-        try (PreparedStatement pst = con.prepareStatement(selectFromTable); ResultSet rs = pst.executeQuery()) {
-            System.out.println("Полученные данные: ");
-            System.out.printf("%2s | %-31s | %-31s | %-31s \n", "ID", "Матрица 1", "Матрица 2", "Перемноженная матрица");
-            while (rs.next()) {
-                int ID = rs.getInt(1);
+        try (PreparedStatement pst = con.prepareStatement(selectFromTable)) {
+            pst.setString(1, table);
+            try (ResultSet rs = pst.executeQuery()) {
+                System.out.println("Полученные данные: ");
+                System.out.printf("%2s | %-31s | %-31s | %-31s \n", "ID", "Матрица 1", "Матрица 2", "Перемноженная матрица");
+                while (rs.next()) {
+                    int ID = rs.getInt(1);
 
-                Array matrixArray1 = rs.getArray(2);
-                Integer[][] matrix1 = (Integer[][])matrixArray1.getArray();
+                    Array matrixArray1 = rs.getArray(2);
+                    Integer[][] matrix1 = (Integer[][]) matrixArray1.getArray();
 
-                Array matrixArray2 = rs.getArray(3);
-                Integer[][] matrix2 = (Integer[][])matrixArray2.getArray();
+                    Array matrixArray2 = rs.getArray(3);
+                    Integer[][] matrix2 = (Integer[][]) matrixArray2.getArray();
 
-                Array matrixArray3 = rs.getArray(4);
-                if (matrixArray3 != null) {
-                    Integer[][] matrixMult = (Integer[][])matrixArray3.getArray();
-                    System.out.printf("%2d. | %-31s | %-31s | %-31s \n", ID, Arrays.toString(matrix1[0]), Arrays.toString(matrix2[0]), Arrays.toString(matrixMult[0]));
-                    for (int i = 1; i < 7; i++) {
-                        System.out.printf("%3s | %-31s | %-31s | %-31s \n", "", Arrays.toString(matrix1[i]), Arrays.toString(matrix2[i]), Arrays.toString(matrixMult[i]));
-                    }
-                } else {
-                    System.out.printf("%2d. | %-31s | %-31s | %-31s \n", ID, Arrays.toString(matrix1[0]), Arrays.toString(matrix2[0]), "NULL");
-                    for (int i = 1; i < 7; i++) {
-                        System.out.printf("%3s | %-31s | %-31s | %-31s \n", "", Arrays.toString(matrix1[i]), Arrays.toString(matrix2[i]), "NULL");
+                    Array matrixArray3 = rs.getArray(4);
+                    if (matrixArray3 != null) {
+                        Integer[][] matrixMult = (Integer[][]) matrixArray3.getArray();
+                        System.out.printf("%2d. | %-31s | %-31s | %-31s \n", ID, Arrays.toString(matrix1[0]), Arrays.toString(matrix2[0]), Arrays.toString(matrixMult[0]));
+                        for (int i = 1; i < 7; i++) {
+                            System.out.printf("%3s | %-31s | %-31s | %-31s \n", "", Arrays.toString(matrix1[i]), Arrays.toString(matrix2[i]), Arrays.toString(matrixMult[i]));
+                        }
+                    } else {
+                        System.out.printf("%2d. | %-31s | %-31s | %-31s \n", ID, Arrays.toString(matrix1[0]), Arrays.toString(matrix2[0]), "NULL");
+                        for (int i = 1; i < 7; i++) {
+                            System.out.printf("%3s | %-31s | %-31s | %-31s \n", "", Arrays.toString(matrix1[i]), Arrays.toString(matrix2[i]), "NULL");
+                        }
                     }
                 }
-
-
             }
-
         } catch (SQLException e) {
             System.out.println("Не удалось получить данные из таблицы, " + e.getMessage());
         }
@@ -112,7 +113,7 @@ public class ArrayPI extends Main {
         int[][] matrix = new int[7][7];
         for (int i = 0; i < matrix.length; i++) {
             System.out.print("Введите строку чисел ");
-            System.out.print(i+1);
+            System.out.print(i + 1);
             System.out.print(": ");
             for (int j = 0; j < matrix[i].length; j++) {
                 try {
