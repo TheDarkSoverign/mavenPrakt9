@@ -4,10 +4,11 @@ import java.sql.*;
 import java.util.Arrays;
 
 public class ArrayPI extends Main {
-
+    int[][] matrix1;
+    int[][] matrix2;
 
     public void task1() {
-        String query = "SELECT table_name AS Названия_таблиц FROM postgres.information_schema.tables WHERE table_schema = '" + schema + "'";
+        String query = "SELECT table_name AS Названия_таблиц FROM information_schema.tables WHERE table_schema = '" + schema + "'";
         try {
             Statement st = con.createStatement();
             ResultSet rs = st.executeQuery(query);
@@ -41,24 +42,29 @@ public class ArrayPI extends Main {
 
     public void task3() {
         System.out.println("Введите матрицу 1");
-        int[][] matrix1 = createMatrix();
+        matrix1 = createMatrix();
         System.out.println("Матрица 1: ");
         for (int[] i : matrix1) {
             System.out.println(Arrays.toString(i));
         }
 
         System.out.println("Введите матрицу 2");
-        int[][] matrix2 = createMatrix();
+        matrix2 = createMatrix();
         System.out.println("Матрица 2:");
         for (int[] i : matrix2) {
             System.out.println(Arrays.toString(i));
         }
 
-        insertData(matrix1, matrix2);
+        insertData();
         selectData();
     }
 
-    public void insertData(int[][] matrix1, int[][] matrix2) {
+    public void task4() {
+        Matrix multiply = new Matrix(matrix1, matrix2);
+
+    }
+
+    public void insertData() {
         System.out.println("Сохраняю в таблицу...");
         try (PreparedStatement pst = con.prepareStatement(insertIntoTable)) {
             pst.setString(1, table);
