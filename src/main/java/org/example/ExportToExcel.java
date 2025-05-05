@@ -1,8 +1,6 @@
 package org.example;
 
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.FileOutputStream;
@@ -14,7 +12,7 @@ import java.sql.SQLException;
 public class ExportToExcel extends Main {
     String filepath;
 
-    public void exportData(String table, String filepath) {
+    public void exportData(String filepath) {
         this.filepath = filepath;
 
         try (PreparedStatement pst = con.prepareStatement(selectFromTable); ResultSet rs = pst.executeQuery()) {
@@ -25,25 +23,18 @@ public class ExportToExcel extends Main {
             row.createCell(1).setCellValue(rs.getMetaData().getColumnName(2));
             row.createCell(2).setCellValue(rs.getMetaData().getColumnName(3));
             row.createCell(3).setCellValue(rs.getMetaData().getColumnName(4));
-            row.createCell(4).setCellValue(rs.getMetaData().getColumnName(5));
-            row.createCell(5).setCellValue(rs.getMetaData().getColumnName(6));
-            row.createCell(6).setCellValue(rs.getMetaData().getColumnName(7));
-            row.createCell(7).setCellValue(rs.getMetaData().getColumnName(8));
-            row.createCell(8).setCellValue(rs.getMetaData().getColumnName(9));
 
             int rowIndex = 1;
             while (rs.next()) {
                 Row row1 = sheet.createRow(rowIndex++);
                 row1.createCell(0).setCellValue(rs.getInt(1));
-                row1.createCell(1).setCellValue(rs.getInt(2));
-                row1.createCell(2).setCellValue(rs.getInt(3));
-                row1.createCell(3).setCellValue(rs.getInt(4));
-                row1.createCell(4).setCellValue(rs.getInt(5));
-                row1.createCell(5).setCellValue(rs.getInt(6));
-                row1.createCell(6).setCellValue(rs.getInt(7));
-                row1.createCell(7).setCellValue(rs.getInt(8));
-                row1.createCell(8).setCellValue(rs.getInt(9));
-
+                row1.createCell(1).setCellValue(rs.getArray(2).toString());
+                row1.createCell(2).setCellValue(rs.getArray(3).toString());
+                if (rs.getArray(4) == null) {
+                    row1.createCell(3).setCellValue("null");
+                } else {
+                    row1.createCell(3).setCellValue(rs.getArray(4).toString());
+                }
             }
             int columnCount = sheet.getRow(0).getPhysicalNumberOfCells();
             for (int i = 0; i < columnCount; i++) {
@@ -59,6 +50,26 @@ public class ExportToExcel extends Main {
             }
         } catch (IOException | SQLException e) {
             System.out.println("Ошибка при экспорте данных: " + e);
+        }
+    }
+
+    public void printExcelData(String filepath) {
+        try (Workbook wb = new XSSFWorkbook(filepath)) {
+            Sheet sheet = wb.getSheetAt(0);
+            System.out.println("\nДанные из Excel-файла:");
+
+            for (Row row : sheet) {
+                for (Cell cell : row) {
+                    switch (cell.getCellType()) {
+                        case STRING -> System.out.print(cell.getStringCellValue() + "\t");
+                        case NUMERIC -> System.out.print((int)cell.getNumericCellValue() + "\t");
+                        default -> System.out.print(" \t");
+                    }
+                }
+                System.out.println();
+            }
+        } catch (IOException e) {
+            System.out.println("Ошибка при чтении Excel-файла: " + e.getMessage());
         }
     }
 }

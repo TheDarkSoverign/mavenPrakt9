@@ -8,7 +8,7 @@ public class Main {
     protected static Connection con;
     static final String schema = "task6";
     protected static String table = "task6";
-    static final String createTable = "CREATE TABLE IF NOT EXISTS ? (ID SERIAL, matrix1 int[], matrix2 int[], matrixMult int[])";
+    static final String createTable = "CREATE TABLE IF NOT EXISTS " + table + " (ID SERIAL, matrix1 int[], matrix2 int[], matrixMult int[])";
     static final String insertIntoTable = "INSERT INTO " + table + " (matrix1, matrix2, matrixMult) VALUES (?, ?, ?)";
     static final String selectFromTable = "SELECT * FROM " + table;
 
@@ -43,7 +43,6 @@ public class Main {
 
         try {
             PreparedStatement pst = con.prepareStatement(createTable);
-            pst.setString(1, table);
             pst.executeUpdate();
             System.out.println("Используется таблица по умолчанию - " + table);
         } catch (SQLException e) {
@@ -84,7 +83,8 @@ public class Main {
                         filepath += ".xlsx";
                     }
 
-                    export.exportData(table, filepath);
+                    export.exportData(filepath);
+                    export.printExcelData(filepath);
                 }
                 case 0 -> System.out.println("Пока!");
                 default -> System.out.println("Неправильно выбран пункт меню! Попробуйте еще раз...");
