@@ -31,7 +31,6 @@ public class ArrayPI extends Main {
         table = sc.next();
         try {
             PreparedStatement pst = con.prepareStatement(createTable);
-            pst.setString(1, table);
             pst.executeUpdate();
             System.out.println("Таблица " + table + " успешно создана/выбрана!");
         } catch (SQLException e) {
