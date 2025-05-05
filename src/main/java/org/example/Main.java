@@ -9,8 +9,8 @@ public class Main {
     static final String schema = "task6";
     protected static String table = "task6";
     static final String createTable = "CREATE TABLE IF NOT EXISTS ? (ID SERIAL, matrix1 int[], matrix2 int[], matrixMult int[])";
-    static final String insertIntoTable = "INSERT INTO ? (matrix1, matrix2, matrixMult) VALUES (?, ?, ?)";
-    static final String selectFromTable = "SELECT * FROM ?";
+    static final String insertIntoTable = "INSERT INTO " + table + " (matrix1, matrix2, matrixMult) VALUES (?, ?, ?)";
+    static final String selectFromTable = "SELECT * FROM " + table;
 
 
     static String Url = "jdbc:postgresql://localhost:5432/postgres";
@@ -75,6 +75,7 @@ public class Main {
                 case 1 -> tasks.task1();
                 case 2 -> tasks.task2();
                 case 3 -> tasks.task3();
+                case 4 -> tasks.task4();
                 case 5 -> {
                     System.out.print("Введите название файла: ");
                     String filepath = sc.nextLine();

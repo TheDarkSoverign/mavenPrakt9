@@ -60,17 +60,22 @@ public class ArrayPI extends Main {
     }
 
     public void task4() {
+        if (matrix1 == null || matrix2 == null) {
+            System.out.println("Матрицы пустые!");
+            task3();
+        }
         Matrix multiply = new Matrix(matrix1, matrix2);
+        multiply.multiply();
 
+        selectData();
     }
 
     public void insertData() {
         System.out.println("Сохраняю в таблицу...");
         try (PreparedStatement pst = con.prepareStatement(insertIntoTable)) {
-            pst.setString(1, table);
-            pst.setArray(2, con.createArrayOf("INTEGER", matrix1));
-            pst.setArray(3, con.createArrayOf("INTEGER", matrix2));
-            pst.setNull(4, Types.NULL);
+            pst.setArray(1, con.createArrayOf("INTEGER", matrix1));
+            pst.setArray(2, con.createArrayOf("INTEGER", matrix2));
+            pst.setNull(3, Types.NULL);
             pst.executeUpdate();
             System.out.println("Все выполненные результаты добавлены в таблицу!");
         } catch (
@@ -82,10 +87,9 @@ public class ArrayPI extends Main {
     public void selectData() {
         System.out.println("Получаю данные...");
         try (PreparedStatement pst = con.prepareStatement(selectFromTable)) {
-            pst.setString(1, table);
             try (ResultSet rs = pst.executeQuery()) {
                 System.out.println("Полученные данные: ");
-                System.out.printf("%2s | %-31s | %-31s | %-31s \n", "ID", "Матрица 1", "Матрица 2", "Перемноженная матрица");
+                System.out.printf("%3s | %-31s | %-31s | %-31s \n", "ID", "Матрица 1", "Матрица 2", "Перемноженная матрица");
                 while (rs.next()) {
                     int ID = rs.getInt(1);
 

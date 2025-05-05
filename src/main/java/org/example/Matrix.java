@@ -2,7 +2,7 @@ package org.example;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Types;
+import java.util.Arrays;
 
 public final class Matrix extends ArrayPI {
     int[][] matrix1;
@@ -15,17 +15,28 @@ public final class Matrix extends ArrayPI {
     }
 
     public void multiply() {
+        matrixMult = new int[matrix1.length][matrix2[0].length];
+        for (int i = 0; i < matrixMult.length; i++) {
+            for (int j = 0; j < matrixMult.length; j++) {
+                for (int k = 0; k < matrixMult.length; k++) {
+                    matrixMult[i][j] += matrix1[i][k] * matrix2[k][j];
+                }
+            }
+        }
+        System.out.println("Перемноженная матрица:");
+        for (int[] i : matrixMult) {
+            System.out.println(Arrays.toString(i));
+        }
 
+        insertData();
     }
 
     @Override
     public void insertData() {
         System.out.println("Сохраняю в таблицу...");
-        String query = "UPDATE ? SET matrixMult = ? WHERE id = (SELECT MAX(id) FROM ? WHERE matrixMult IS NULL)";
+        String query = "UPDATE " + table + " SET matrixMult = ? WHERE id = (SELECT MAX(id) FROM " + table + " WHERE matrixMult IS NULL)";
         try (PreparedStatement pst = con.prepareStatement(query)) {
-            pst.setString(1, table);
-            pst.setArray( 2, con.createArrayOf("INTEGER", matrixMult));
-            pst.setString(3, table);
+            pst.setArray( 1, con.createArrayOf("INTEGER", matrixMult));
             pst.executeUpdate();
             System.out.println("Все выполненные результаты добавлены в таблицу!");
         } catch (
