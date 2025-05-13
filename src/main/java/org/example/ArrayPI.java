@@ -1,7 +1,9 @@
 package org.example;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class ArrayPI extends Main {
     int[][] matrix1;
@@ -13,11 +15,25 @@ public class ArrayPI extends Main {
             Statement st = con.createStatement();
             ResultSet rs = st.executeQuery(query);
             try {
+                int nameLength = 15;
+                while (rs.next()) {
+                    int currentNameLength = rs.getString(1).length();
+                    if (currentNameLength > nameLength) {
+                        nameLength = currentNameLength;
+                    }
+                }
+                String tablePart = "+" + "-".repeat(5) + "+" + "-".repeat(nameLength + 2) + "+";
                 System.out.println("Список таблиц:");
+                System.out.println(tablePart);
+                System.out.printf("| %-3s | %-" + nameLength + "s |\n", "ID", "Названия таблиц");
+                rs = st.executeQuery(query);
+                int i = 1;
                 while (rs.next()) {
                     String tableName = rs.getString("Названия_таблиц");
-                    System.out.println(tableName);
+                    System.out.println(tablePart);
+                    System.out.printf("| %-3d | %-" + nameLength + "s |\n", i++, tableName);
                 }
+                System.out.println(tablePart);
             } catch (SQLException e) {
                 System.out.println("Не удалось вывести результат, " + e.getMessage());
             }
@@ -29,8 +45,10 @@ public class ArrayPI extends Main {
     public void task2() {
         System.out.print("Введите название таблицы: ");
         table = sc.next();
+        sc.nextLine();
+        String query = "CREATE TABLE IF NOT EXISTS " + table + " (ID SERIAL, matrix1 int[], matrix2 int[], matrixMult int[])";
         try {
-            PreparedStatement pst = con.prepareStatement(createTable);
+            PreparedStatement pst = con.prepareStatement(query);
             pst.executeUpdate();
             System.out.println("Таблица " + table + " успешно создана/выбрана!");
         } catch (SQLException e) {
@@ -71,7 +89,8 @@ public class ArrayPI extends Main {
 
     public void insertData() {
         System.out.println("Сохраняю в таблицу...");
-        try (PreparedStatement pst = con.prepareStatement(insertIntoTable)) {
+        String query = "INSERT INTO " + table + " (matrix1, matrix2, matrixMult) VALUES (?, ?, ?)";
+        try (PreparedStatement pst = con.prepareStatement(query)) {
             pst.setArray(1, con.createArrayOf("INTEGER", matrix1));
             pst.setArray(2, con.createArrayOf("INTEGER", matrix2));
             pst.setNull(3, Types.NULL);
@@ -85,34 +104,62 @@ public class ArrayPI extends Main {
 
     public void selectData() {
         System.out.println("Получаю данные...");
-        try (PreparedStatement pst = con.prepareStatement(selectFromTable)) {
-            try (ResultSet rs = pst.executeQuery()) {
-                System.out.println("Полученные данные: ");
-                System.out.printf("%3s | %-31s | %-31s | %-31s \n", "ID", "Матрица 1", "Матрица 2", "Перемноженная матрица");
-                while (rs.next()) {
-                    int ID = rs.getInt(1);
+        String query = "SELECT * FROM " + table;
+        try (PreparedStatement pst = con.prepareStatement(query);
+             ResultSet rs = pst.executeQuery()) {
 
-                    Array matrixArray1 = rs.getArray(2);
-                    Integer[][] matrix1 = (Integer[][]) matrixArray1.getArray();
+            ResultSetMetaData rsmd = rs.getMetaData();
+            int length = rsmd.getColumnCount();
 
-                    Array matrixArray2 = rs.getArray(3);
-                    Integer[][] matrix2 = (Integer[][]) matrixArray2.getArray();
+            String[] columnNames = new String[length];
+            int[] maxLength = new int[length];
 
-                    Array matrixArray3 = rs.getArray(4);
-                    if (matrixArray3 != null) {
-                        Integer[][] matrixMult = (Integer[][]) matrixArray3.getArray();
-                        System.out.printf("%2d. | %-31s | %-31s | %-31s \n", ID, Arrays.toString(matrix1[0]), Arrays.toString(matrix2[0]), Arrays.toString(matrixMult[0]));
-                        for (int i = 1; i < 7; i++) {
-                            System.out.printf("%3s | %-31s | %-31s | %-31s \n", "", Arrays.toString(matrix1[i]), Arrays.toString(matrix2[i]), Arrays.toString(matrixMult[i]));
-                        }
-                    } else {
-                        System.out.printf("%2d. | %-31s | %-31s | %-31s \n", ID, Arrays.toString(matrix1[0]), Arrays.toString(matrix2[0]), "NULL");
-                        for (int i = 1; i < 7; i++) {
-                            System.out.printf("%3s | %-31s | %-31s | %-31s \n", "", Arrays.toString(matrix1[i]), Arrays.toString(matrix2[i]), "NULL");
-                        }
+            List<List<String>> rows = new ArrayList<>();
+
+            for (int i = 0; i < length; i++) {
+                columnNames[i] = rsmd.getColumnName(i + 1);
+                maxLength[i] = rsmd.getColumnName(i + 1).length();
+            }
+
+            while (rs.next()) {
+                List<String> row = new ArrayList<>();
+                for (int i = 0; i < length; i++) {
+                    String obj = rs.getString(i + 1);
+                    obj = (obj != null) ? obj : "NULL";
+                    row.add(obj);
+                    if (obj.length() > maxLength[i]) {
+                        maxLength[i] = obj.length();
                     }
                 }
+                rows.add(row);
             }
+
+            StringBuilder border = new StringBuilder("+");
+            StringBuilder header = new StringBuilder("|");
+
+            for (int width : maxLength) {
+                border.append("-".repeat(width + 2)).append("+");
+            }
+            System.out.println("Полученные данные из таблицы: ");
+            System.out.println(border);
+
+
+            for (int i = 0; i < length; i++) {
+                header.append(" ").append(String.format("%-" + maxLength[i] + "s", columnNames[i])).append(" |");
+            }
+            System.out.println(header);
+            System.out.println(border);
+
+            for (List<String> row : rows) {
+                StringBuilder rowStr = new StringBuilder("|");
+                for (int i = 0; i < length; i++) {
+                    String val = (i < row.size()) ? row.get(i) : "";
+                    rowStr.append(" ").append(String.format("%-" + maxLength[i] + "s", val)).append(" |");
+                }
+                System.out.println(rowStr);
+                System.out.println(border);
+            }
+
         } catch (SQLException e) {
             System.out.println("Не удалось получить данные из таблицы, " + e.getMessage());
         }

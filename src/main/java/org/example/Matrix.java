@@ -31,7 +31,7 @@ public final class Matrix extends ArrayPI {
         insertData();
     }
 
-    @Override
+
     public void insertData() {
         System.out.println("Сохраняю в таблицу...");
         String query = "UPDATE " + table + " SET matrixMult = ? WHERE id = (SELECT MAX(id) FROM " + table + " WHERE matrixMult IS NULL)";

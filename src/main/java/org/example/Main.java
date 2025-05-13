@@ -8,9 +8,6 @@ public class Main {
     protected static Connection con;
     static final String schema = "task6";
     protected static String table = "task6";
-    static final String createTable = "CREATE TABLE IF NOT EXISTS " + table + " (ID SERIAL, matrix1 int[], matrix2 int[], matrixMult int[])";
-    static final String insertIntoTable = "INSERT INTO " + table + " (matrix1, matrix2, matrixMult) VALUES (?, ?, ?)";
-    static final String selectFromTable = "SELECT * FROM " + table;
 
 
     static String Url = "jdbc:postgresql://localhost:5432/postgres";
@@ -41,9 +38,11 @@ public class Main {
             }
         }
 
+        String query = "CREATE TABLE IF NOT EXISTS task6 (id SERIAL, sum INT, sub INT, mul INT, div INT, mod INT, abs_1 INT, abs_2 INT, pow INT)";
         try {
-            PreparedStatement pst = con.prepareStatement(createTable);
-            pst.executeUpdate();
+            Statement st = con.createStatement();
+            st.executeUpdate(query);
+            table = "task6";
             System.out.println("Используется таблица по умолчанию - " + table);
         } catch (SQLException e) {
             System.out.println("Не удалось использовать таблицу по умолчанию, " + e.getMessage());
