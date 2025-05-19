@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
 public class ExportToExcel extends Main {
@@ -16,27 +17,29 @@ public class ExportToExcel extends Main {
         this.filepath = filepath;
         String query = "SELECT * FROM " + table;
         try (PreparedStatement pst = con.prepareStatement(query); ResultSet rs = pst.executeQuery()) {
+            ResultSetMetaData rsmd = rs.getMetaData();
+            int columnCount = rsmd.getColumnCount();
             Workbook wb = new XSSFWorkbook();
-            Sheet sheet = wb.createSheet("task 6");
+            Sheet sheet = wb.createSheet("task 9");
             Row row = sheet.createRow(0);
-            row.createCell(0).setCellValue(rs.getMetaData().getColumnName(1));
-            row.createCell(1).setCellValue(rs.getMetaData().getColumnName(2));
-            row.createCell(2).setCellValue(rs.getMetaData().getColumnName(3));
-            row.createCell(3).setCellValue(rs.getMetaData().getColumnName(4));
+            for (int i = 0; i < columnCount; i++) {
+                row.createCell(i).setCellValue(rs.getMetaData().getColumnName(i+1));
+            }
 
             int rowIndex = 1;
             while (rs.next()) {
                 Row row1 = sheet.createRow(rowIndex++);
                 row1.createCell(0).setCellValue(rs.getInt(1));
-                row1.createCell(1).setCellValue(rs.getArray(2).toString());
-                row1.createCell(2).setCellValue(rs.getArray(3).toString());
-                if (rs.getArray(4) == null) {
-                    row1.createCell(3).setCellValue("null");
-                } else {
-                    row1.createCell(3).setCellValue(rs.getArray(4).toString());
+                for (int i = 1; i < columnCount; i++) {
+                    if (rs.getArray(i+1) == null) {
+                        row1.createCell(i).setCellValue("null");
+                    } else {
+                        row1.createCell(i).setCellValue(rs.getArray(i+1).toString());
+                    }
                 }
             }
-            int columnCount = sheet.getRow(0).getPhysicalNumberOfCells();
+
+            columnCount = sheet.getRow(0).getPhysicalNumberOfCells();
             for (int i = 0; i < columnCount; i++) {
                 sheet.autoSizeColumn(i);
             }
