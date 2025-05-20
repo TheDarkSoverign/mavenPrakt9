@@ -12,11 +12,10 @@ public final class Pow extends ArrayPI {
         } else {
             baseMatrix = Main.arrayPI.getMatrix2();
         }
-        int[][] matrix = new int[7][7];
 
-        for (int i = 0; i < matrix.length; i++) {
-            matrix[i] = Arrays.copyOf(matrix[i], baseMatrix[i].length);
-        }
+        int[][] matrix = new int[7][7];
+        copyMatrix(baseMatrix, matrix);
+
         System.out.println("Введите степень, в которую будет возводиться выбранная матрица: ");
         int power = -1;
         while (power < 0) {
@@ -45,7 +44,9 @@ public final class Pow extends ArrayPI {
         } else if (power == 1) {
             return matrix;
         } else {
+            int[][] result = new int[7][7];
             for (int p = 1; p < power; p++) {
+                clearMatrix(result);
                 for (int i = 0; i < matrix.length; i++) {
                     for (int j = 0; j < matrix.length; j++) {
                         for (int k = 0; k < matrix.length; k++) {
@@ -53,9 +54,21 @@ public final class Pow extends ArrayPI {
                         }
                     }
                 }
-                matrix = result;
+                copyMatrix(result, matrix);
             }
             return result;
+        }
+    }
+
+    public void copyMatrix(int[][] copyOf, int[][] copyTo) {
+        for (int i = 0; i < copyOf.length; i++) {
+            System.arraycopy(copyOf[i], 0, copyTo[i], 0, copyOf.length);
+        }
+    }
+
+    public void clearMatrix(int[][] matrix) {
+        for (int[] i : matrix) {
+            Arrays.fill(i, 0);
         }
     }
 }
